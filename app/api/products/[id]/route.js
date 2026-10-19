@@ -1,34 +1,32 @@
 import { NextResponse } from 'next/server';
 import { getPool } from '@/lib/db';
 
-// GET /api/products/:id -> get one product
-export async function GET(request, { params }) {
-  try {
-    const pool = getPool();
-    const [rows] = await pool.query('SELECT * FROM products WHERE id = ?', [
-      params.id,
-    ]);
-
-    if (rows.length === 0) {
-      return NextResponse.json({ error: 'Produk tidak ditemukan' }, { status: 404 });
-    }
-
-    return NextResponse.json(rows[0]);
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-}
-
-// PUT /api/products/:id -> update a product
+// PUT /api/products/[id] -> Update/Edit produk berdasarkan ID
 export async function PUT(request, { params }) {
   try {
+    const { id } = await params;
     const body = await request.json();
     const { name, description, price } = body;
 
-    if (!name || price === undefined || price === '') {
+    if (!id) {
       return NextResponse.json(
-        { error: 'Field "name" dan "price" wajib diisi' },
+        { success: false, message: 'ID produk tidak terdeteksi' },
+        { status: 400 }
+      );
+    }
+
+    // Validasi input
+    if (!name?.trim() || !description?.trim() || price === undefined || price === '') {
+      return NextResponse.json(
+        { success: false, message: 'Semua kolom (Nama, Deskripsi, Harga) wajib diisi!' },
+        { status: 400 }
+      );
+    }
+
+    const parsedPrice = Number(price);
+    if (!Number.isInteger(parsedPrice) || parsedPrice <= 0) {
+      return NextResponse.json(
+        { success: false, message: 'Harga harus berupa angka bulat positif (tanpa koma/desimal)!' },
         { status: 400 }
       );
     }
@@ -36,35 +34,60 @@ export async function PUT(request, { params }) {
     const pool = getPool();
     const [result] = await pool.query(
       'UPDATE products SET name = ?, description = ?, price = ? WHERE id = ?',
-      [name, description || null, price, params.id]
+      [name.trim(), description.trim(), parsedPrice, id]
     );
 
     if (result.affectedRows === 0) {
-      return NextResponse.json({ error: 'Produk tidak ditemukan' }, { status: 404 });
+      return NextResponse.json(
+        { success: false, message: 'Produk tidak ditemukan' },
+        { status: 404 }
+      );
     }
 
-    return NextResponse.json({ id: Number(params.id), name, description, price });
+    return NextResponse.json({
+      success: true,
+      message: 'Produk berhasil diperbarui!',
+    });
   } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('Error PUT product:', error);
+    return NextResponse.json(
+      { success: false, message: 'Gagal memperbarui produk', error: error.message },
+      { status: 500 }
+    );
   }
 }
 
-// DELETE /api/products/:id -> delete a product
+// DELETE /api/products/[id] -> Hapus produk berdasarkan ID
 export async function DELETE(request, { params }) {
   try {
-    const pool = getPool();
-    const [result] = await pool.query('DELETE FROM products WHERE id = ?', [
-      params.id,
-    ]);
+    const { id } = await params;
 
-    if (result.affectedRows === 0) {
-      return NextResponse.json({ error: 'Produk tidak ditemukan' }, { status: 404 });
+    if (!id) {
+      return NextResponse.json(
+        { success: false, message: 'ID produk tidak terdeteksi' },
+        { status: 400 }
+      );
     }
 
-    return NextResponse.json({ success: true });
+    const pool = getPool();
+    const [result] = await pool.query('DELETE FROM products WHERE id = ?', [id]);
+
+    if (result.affectedRows === 0) {
+      return NextResponse.json(
+        { success: false, message: 'Produk tidak ditemukan atau sudah dihapus' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Produk berhasil dihapus dari database',
+    });
   } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('Error DELETE product:', error);
+    return NextResponse.json(
+      { success: false, message: 'Gagal menghapus produk', error: error.message },
+      { status: 500 }
+    );
   }
 }
