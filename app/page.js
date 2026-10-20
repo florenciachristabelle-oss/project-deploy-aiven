@@ -8,13 +8,12 @@ export default function ProductsPage() {
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
-  // Form State
+
   const [editingId, setEditingId] = useState(null);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
 
-  // Fetch data saat halaman dimuat
   useEffect(() => {
     fetchProducts();
   }, []);
@@ -43,14 +42,12 @@ export default function ProductsPage() {
     setPrice('');
   };
 
-  // Mencegah input karakter koma, titik, minus, dan 'e' secara real-time pada kolom harga
   const handlePriceKeyDown = (e) => {
     if (e.key === ',' || e.key === '.' || e.key === '-' || e.key === 'e') {
       e.preventDefault();
     }
   };
 
-  // Handle Pilih Produk untuk Di-Edit
   const handleEditSelect = (product) => {
     setEditingId(product.id);
     setName(product.name);
@@ -60,7 +57,6 @@ export default function ProductsPage() {
     setSuccessMsg('');
   };
 
-  // Handle Simpan / Update Produk
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg('');
@@ -86,7 +82,6 @@ export default function ProductsPage() {
       let res, result;
 
       if (editingId) {
-        // Mode Edit (PUT)
         res = await fetch(`/api/products/${editingId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -102,7 +97,6 @@ export default function ProductsPage() {
           setErrorMsg(result.message || 'Gagal memperbarui produk.');
         }
       } else {
-        // Mode Tambah Baru (POST)
         res = await fetch('/api/products', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -123,7 +117,6 @@ export default function ProductsPage() {
     }
   };
 
-  // Handle Hapus Produk
   const handleDelete = async (id) => {
     if (!confirm('Apakah Anda yakin ingin menghapus produk ini?')) return;
 
@@ -147,43 +140,52 @@ export default function ProductsPage() {
   };
 
   return (
-    <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '40px 20px' }}>
-      {/* Header */}
-      <div style={{ borderBottom: '1px solid #222222', paddingBottom: '20px', marginBottom: '30px' }}>
-        <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#ffffff' }}>
-          CRUD Produk - Next.js & MySQL (Aiven)
-        </h1>
-        <p style={{ color: '#888888', fontSize: '14px', marginTop: '6px' }}>
-          Sistem manajemen produk dan deskripsi berbasis database MySQL Aiven.
-        </p>
+    <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '40px 20px' }}>
+      
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #1f1f2e', paddingBottom: '24px', marginBottom: '32px' }}>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{ fontSize: '24px' }}>📦</span>
+            <h1 style={{ fontSize: '24px', fontWeight: '800', color: '#ffffff', letterSpacing: '-0.5px' }}>
+              Katalog Produk
+            </h1>
+          </div>
+          <p style={{ color: '#8b8d9e', fontSize: '14px', marginTop: '4px' }}>
+            Manajemen inventaris barang terhubung dengan MySQL Aiven
+          </p>
+        </div>
+        <div style={{ backgroundColor: '#161622', border: '1px solid #28283d', padding: '8px 16px', borderRadius: '20px', fontSize: '13px', color: '#a0a2b6' }}>
+          Total Items: <strong style={{ color: '#60a5fa' }}>{products.length}</strong>
+        </div>
       </div>
 
-      {/* Pesan Alert Error / Sukses */}
+
       {errorMsg && (
-        <div style={{ backgroundColor: '#1a0505', border: '1px solid #7f1d1d', color: '#fca5a5', padding: '12px 16px', borderRadius: '6px', marginBottom: '20px', fontSize: '14px' }}>
+        <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#fca5a5', padding: '14px 18px', borderRadius: '10px', marginBottom: '24px', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
           ⚠️ {errorMsg}
         </div>
       )}
 
       {successMsg && (
-        <div style={{ backgroundColor: '#051a0b', border: '1px solid #14532d', color: '#86efac', padding: '12px 16px', borderRadius: '6px', marginBottom: '20px', fontSize: '14px' }}>
+        <div style={{ backgroundColor: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.3)', color: '#86efac', padding: '14px 18px', borderRadius: '10px', marginBottom: '24px', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
           ✅ {successMsg}
         </div>
       )}
 
-      {/* Main Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '30px' }}>
+      {/* Grid Layout */}
+      <div style={{ display: 'grid', gridTemplateColumns: '340px 1fr', gap: '28px', alignItems: 'start' }}>
         
-        {/* Form Tambah / Edit Produk */}
-        <div style={{ backgroundColor: '#111111', border: '1px solid #222222', padding: '24px', borderRadius: '8px', height: 'fit-content' }}>
+        {/* Form Card */}
+        <div style={{ backgroundColor: '#121218', border: '1px solid #22222e', borderRadius: '14px', padding: '24px', boxShadow: '0 10px 30px rgba(0,0,0,0.35)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-            <h2 style={{ fontSize: '16px', fontWeight: '600', color: '#ffffff' }}>
-              {editingId ? '✏️ Edit Produk' : '+ Tambah Produk Baru'}
+            <h2 style={{ fontSize: '15px', fontWeight: '700', color: '#ffffff', textTransform: 'uppercase', tracking: '0.5px' }}>
+              {editingId ? '✏️ Edit Produk' : '➕ Tambah Produk'}
             </h2>
             {editingId && (
               <button
                 onClick={resetForm}
-                style={{ backgroundColor: '#222', color: '#aaa', border: 'none', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}
+                style={{ backgroundColor: '#222230', color: '#a0a2b6', border: 'none', padding: '4px 10px', borderRadius: '6px', cursor: 'pointer', fontSize: '12px' }}
               >
                 Batal
               </button>
@@ -191,35 +193,35 @@ export default function ProductsPage() {
           </div>
 
           <form onSubmit={handleSubmit}>
-            <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', fontSize: '12px', color: '#aaaaaa', marginBottom: '6px' }}>
-                Nama Produk / Kategori
+            <div style={{ marginBottom: '18px' }}>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#a0a2b6', marginBottom: '8px' }}>
+                NAMA PRODUK / KATEGORI
               </label>
               <input
                 type="text"
                 placeholder="Contoh: Laptop Gaming"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                style={{ width: '100%', padding: '10px', backgroundColor: '#000000', border: '1px solid #333333', color: '#ffffff', borderRadius: '6px', fontSize: '14px' }}
+                style={{ width: '100%', padding: '11px 14px', backgroundColor: '#09090d', border: '1px solid #252535', color: '#ffffff', borderRadius: '8px', fontSize: '14px', outline: 'none' }}
               />
             </div>
 
-            <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', fontSize: '12px', color: '#aaaaaa', marginBottom: '6px' }}>
-                Deskripsi
+            <div style={{ marginBottom: '18px' }}>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#a0a2b6', marginBottom: '8px' }}>
+                DESKRIPSI
               </label>
               <textarea
                 placeholder="Tulis deskripsi singkat produk..."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={3}
-                style={{ width: '100%', padding: '10px', backgroundColor: '#000000', border: '1px solid #333333', color: '#ffffff', borderRadius: '6px', fontSize: '14px', resize: 'none' }}
+                style={{ width: '100%', padding: '11px 14px', backgroundColor: '#09090d', border: '1px solid #252535', color: '#ffffff', borderRadius: '8px', fontSize: '14px', outline: 'none', resize: 'none' }}
               />
             </div>
 
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', fontSize: '12px', color: '#aaaaaa', marginBottom: '6px' }}>
-                Harga (Rp) <span style={{ color: '#666666', fontSize: '11px' }}>(Tanpa koma/desimal)</span>
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#a0a2b6', marginBottom: '8px' }}>
+                HARGA (RP)
               </label>
               <input
                 type="number"
@@ -227,8 +229,9 @@ export default function ProductsPage() {
                 value={price}
                 onKeyDown={handlePriceKeyDown}
                 onChange={(e) => setPrice(e.target.value)}
-                style={{ width: '100%', padding: '10px', backgroundColor: '#000000', border: '1px solid #333333', color: '#ffffff', borderRadius: '6px', fontSize: '14px' }}
+                style={{ width: '100%', padding: '11px 14px', backgroundColor: '#09090d', border: '1px solid #252535', color: '#ffffff', borderRadius: '8px', fontSize: '14px', outline: 'none' }}
               />
+              <p style={{ fontSize: '11px', color: '#525266', marginTop: '6px' }}>Hanya angka bulat positif tanpa koma/desimal.</p>
             </div>
 
             <button
@@ -236,59 +239,69 @@ export default function ProductsPage() {
               style={{
                 width: '100%',
                 padding: '12px',
-                backgroundColor: editingId ? '#3b82f6' : '#ffffff',
-                color: editingId ? '#ffffff' : '#000000',
-                fontWeight: 'bold',
+                background: editingId ? 'linear-gradient(135deg, #2563eb, #1d4ed8)' : 'linear-gradient(135deg, #3b82f6, #2563eb)',
+                color: '#ffffff',
+                fontWeight: '700',
                 border: 'none',
-                borderRadius: '6px',
+                borderRadius: '8px',
                 cursor: 'pointer',
-                fontSize: '14px'
+                fontSize: '14px',
+                boxShadow: '0 4px 14px rgba(37, 99, 235, 0.3)',
+                transition: 'all 0.2s'
               }}
             >
-              {editingId ? 'Update Produk' : 'Simpan Produk'}
+              {editingId ? 'Simpan Perubahan' : 'Tambah Produk'}
             </button>
           </form>
         </div>
 
-        {/* Tabel Daftar Produk */}
-        <div style={{ backgroundColor: '#111111', border: '1px solid #222222', padding: '24px', borderRadius: '8px' }}>
-          <h2 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '20px', color: '#ffffff' }}>
-            Daftar Produk
+        {/* Table Card */}
+        <div style={{ backgroundColor: '#121218', border: '1px solid #22222e', borderRadius: '14px', padding: '24px', boxShadow: '0 10px 30px rgba(0,0,0,0.35)' }}>
+          <h2 style={{ fontSize: '15px', fontWeight: '700', color: '#ffffff', marginBottom: '20px', textTransform: 'uppercase', tracking: '0.5px' }}>
+            Daftar Produk Terdaftar
           </h2>
 
           {loading ? (
-            <p style={{ color: '#666666', fontSize: '14px' }}>Memuat data dari MySQL Aiven...</p>
+            <div style={{ padding: '40px', textAlign: 'center', color: '#6b7280', fontSize: '14px' }}>
+              ⏳ Memuat data dari database...
+            </div>
           ) : products.length === 0 ? (
-            <p style={{ color: '#666666', fontSize: '14px' }}>Belum ada produk yang tersimpan di database.</p>
+            <div style={{ padding: '40px', textAlign: 'center', color: '#6b7280', fontSize: '14px' }}>
+              Belum ada data produk tersimpan.
+            </div>
           ) : (
             <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '14px' }}>
+              <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0 8px', textAlign: 'left', fontSize: '14px' }}>
                 <thead>
-                  <tr style={{ borderBottom: '1px solid #222222', color: '#888888' }}>
-                    <th style={{ padding: '10px' }}>Nama</th>
-                    <th style={{ padding: '10px' }}>Deskripsi</th>
-                    <th style={{ padding: '10px' }}>Harga</th>
-                    <th style={{ padding: '10px', textAlign: 'center' }}>Aksi</th>
+                  <tr style={{ color: '#6b7280', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    <th style={{ padding: '8px 12px' }}>Nama Produk</th>
+                    <th style={{ padding: '8px 12px' }}>Deskripsi</th>
+                    <th style={{ padding: '8px 12px' }}>Harga</th>
+                    <th style={{ padding: '8px 12px', textAlign: 'right' }}>Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
                   {products.map((item) => (
-                    <tr key={item.id} style={{ borderBottom: '1px solid #1a1a1a' }}>
-                      <td style={{ padding: '12px 10px', color: '#ffffff', fontWeight: '500' }}>{item.name}</td>
-                      <td style={{ padding: '12px 10px', color: '#aaaaaa' }}>{item.description}</td>
-                      <td style={{ padding: '12px 10px', color: '#4ade80', fontWeight: '500' }}>
+                    <tr key={item.id} style={{ backgroundColor: '#0b0b10', borderRadius: '8px' }}>
+                      <td style={{ padding: '14px 12px', color: '#ffffff', fontWeight: '600', borderTopLeftRadius: '8px', borderBottomLeftRadius: '8px' }}>
+                        {item.name}
+                      </td>
+                      <td style={{ padding: '14px 12px', color: '#9ca3af', maxWidth: '240px' }}>
+                        {item.description}
+                      </td>
+                      <td style={{ padding: '14px 12px', color: '#4ade80', fontWeight: '700', whiteSpace: 'nowrap' }}>
                         Rp {Number(item.price).toLocaleString('id-ID')}
                       </td>
-                      <td style={{ padding: '12px 10px', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                      <td style={{ padding: '14px 12px', textAlign: 'right', whiteSpace: 'nowrap', borderTopRightRadius: '8px', borderBottomRightRadius: '8px' }}>
                         <button
                           onClick={() => handleEditSelect(item)}
-                          style={{ backgroundColor: '#0a192f', color: '#60a5fa', border: '1px solid #1e3a8a', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', marginRight: '6px' }}
+                          style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', color: '#60a5fa', border: '1px solid rgba(59, 130, 246, 0.3)', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', marginRight: '8px', fontWeight: '600' }}
                         >
                           Edit
                         </button>
                         <button
                           onClick={() => handleDelete(item.id)}
-                          style={{ backgroundColor: '#220a0a', color: '#f87171', border: '1px solid #451a1a', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}
+                          style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#f87171', border: '1px solid rgba(239, 68, 68, 0.3)', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: '600' }}
                         >
                           Hapus
                         </button>

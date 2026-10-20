@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getPool } from '@/lib/db';
 
-// GET /api/products -> Ambil daftar produk
+
 export async function GET() {
   try {
     const pool = getPool();
@@ -18,13 +18,12 @@ export async function GET() {
   }
 }
 
-// POST /api/products -> Tambah produk baru dengan validasi
 export async function POST(request) {
   try {
     const body = await request.json();
     const { name, description, price } = body;
 
-    // 1. Validasi: Semua field (Nama, Deskripsi, Harga) wajib diisi
+
     if (!name?.trim() || !description?.trim() || price === undefined || price === '') {
       return NextResponse.json(
         { success: false, message: 'Semua kolom (Nama, Deskripsi, Harga) wajib diisi!' },
@@ -32,7 +31,7 @@ export async function POST(request) {
       );
     }
 
-    // 2. Validasi: Harga harus angka bulat positif (tanpa koma/desimal)
+
     const parsedPrice = Number(price);
     if (!Number.isInteger(parsedPrice) || parsedPrice <= 0) {
       return NextResponse.json(

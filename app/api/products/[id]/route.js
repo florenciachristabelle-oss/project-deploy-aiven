@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getPool } from '@/lib/db';
 
-// PUT /api/products/[id] -> Update/Edit produk berdasarkan ID
+
 export async function PUT(request, { params }) {
   try {
     const { id } = await params;
@@ -15,7 +15,7 @@ export async function PUT(request, { params }) {
       );
     }
 
-    // Validasi input
+
     if (!name?.trim() || !description?.trim() || price === undefined || price === '') {
       return NextResponse.json(
         { success: false, message: 'Semua kolom (Nama, Deskripsi, Harga) wajib diisi!' },
@@ -57,7 +57,7 @@ export async function PUT(request, { params }) {
   }
 }
 
-// DELETE /api/products/[id] -> Hapus produk berdasarkan ID
+
 export async function DELETE(request, { params }) {
   try {
     const { id } = await params;
