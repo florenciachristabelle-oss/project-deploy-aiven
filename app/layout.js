@@ -1,8 +1,8 @@
 import './globals.css';
 
 export const metadata = {
-  title: 'CRUD Produk - Next.js + MySQL',
-  description: 'Aplikasi CRUD Produk dengan Next.js dan Database MySQL (Aiven)',
+  title: 'Vortex Stock - Manajemen Inventaris Produk',
+  description: 'Aplikasi CRUD produk modern terintegrasi dengan MySQL Aiven',
 };
 
 export default function RootLayout({ children }) {
