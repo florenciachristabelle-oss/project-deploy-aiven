@@ -8,7 +8,6 @@ export default function ProductsPage() {
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeFilter, setActiveFilter] = useState('all');
 
   const [editingId, setEditingId] = useState(null);
   const [name, setName] = useState('');
@@ -25,9 +24,9 @@ export default function ProductsPage() {
       const res = await fetch('/api/products');
       const data = await res.json();
       if (data.success) {
-        setProducts(data.data);
+        setProducts(data.data || []);
       } else {
-        setErrorMsg(data.message || 'Gagal memuat data produk.');
+        setErrorMsg(data.message || 'Gagal memuat data buku.');
       }
     } catch (err) {
       setErrorMsg('Gagal terhubung ke server backend.');
@@ -51,9 +50,9 @@ export default function ProductsPage() {
 
   const handleEditSelect = (product) => {
     setEditingId(product.id);
-    setName(product.name);
-    setDescription(product.description);
-    setPrice(product.price.toString());
+    setName(product.name || '');
+    setDescription(product.description || '');
+    setPrice(product.price ? product.price.toString() : '');
     setErrorMsg('');
     setSuccessMsg('');
   };
@@ -64,12 +63,12 @@ export default function ProductsPage() {
     setSuccessMsg('');
 
     if (!name.trim() || !description.trim() || !price) {
-      setErrorMsg('Semua kolom (Nama, Deskripsi, Harga) wajib diisi!');
+      setErrorMsg('Semua kolom (Judul, Penulis/Sinopsis, Jumlah Stok) wajib diisi!');
       return;
     }
 
     if (isNaN(price) || Number(price) <= 0 || price.includes('.') || price.includes(',')) {
-      setErrorMsg('Harga harus berupa angka bulat positif (tanpa koma/desimal)!');
+      setErrorMsg('Jumlah stok harus berupa angka bulat positif!');
       return;
     }
 
@@ -91,11 +90,11 @@ export default function ProductsPage() {
         result = await res.json();
 
         if (result.success) {
-          setSuccessMsg('Produk berhasil diperbarui!');
+          setSuccessMsg('Data buku berhasil diperbarui!');
           resetForm();
           fetchProducts();
         } else {
-          setErrorMsg(result.message || 'Gagal memperbarui produk.');
+          setErrorMsg(result.message || 'Gagal memperbarui data buku.');
         }
       } else {
         res = await fetch('/api/products', {
@@ -106,11 +105,11 @@ export default function ProductsPage() {
         result = await res.json();
 
         if (result.success) {
-          setSuccessMsg('Produk berhasil ditambahkan ke database!');
+          setSuccessMsg('Buku baru berhasil ditambahkan ke katalog!');
           resetForm();
           fetchProducts();
         } else {
-          setErrorMsg(result.message || 'Gagal menyimpan produk.');
+          setErrorMsg(result.message || 'Gagal menyimpan buku.');
         }
       }
     } catch (err) {
@@ -119,7 +118,7 @@ export default function ProductsPage() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Apakah Anda yakin ingin menghapus produk ini?')) return;
+    if (!confirm('Apakah Anda yakin ingin menghapus buku ini dari katalog?')) return;
 
     setErrorMsg('');
     setSuccessMsg('');
@@ -129,23 +128,24 @@ export default function ProductsPage() {
       const result = await res.json();
 
       if (result.success) {
-        setSuccessMsg('Produk berhasil dihapus.');
+        setSuccessMsg('Buku berhasil dihapus dari katalog.');
         if (editingId === id) resetForm();
         fetchProducts();
       } else {
-        setErrorMsg(result.message || 'Gagal menghapus produk.');
+        setErrorMsg(result.message || 'Gagal menghapus buku.');
       }
     } catch (err) {
-      setErrorMsg('Gagal terhubung ke server saat menghapus produk.');
+      setErrorMsg('Gagal terhubung ke server saat menghapus buku.');
     }
   };
 
-  const totalPriceValue = products.reduce((acc, curr) => acc + Number(curr.price || 0), 0);
+  const totalStockCount = products.reduce((acc, curr) => acc + Number(curr.price || 0), 0);
 
   const filteredProducts = products.filter(p => {
-    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          p.description.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesSearch;
+    const itemName = p.name ? p.name.toLowerCase() : '';
+    const itemDesc = p.description ? p.description.toLowerCase() : '';
+    const query = searchQuery.toLowerCase();
+    return itemName.includes(query) || itemDesc.includes(query);
   });
 
   return (
@@ -158,11 +158,10 @@ export default function ProductsPage() {
         padding: '20px 28px',
         marginBottom: '28px',
         display: 'flex',
-        justify: 'space-between',
         alignItems: 'center',
         boxShadow: '0 2px 10px rgba(0,0,0,0.02)'
       }}>
-        <div>
+        <div style={{ flex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <span style={{
               backgroundColor: '#0f766e',
@@ -173,41 +172,25 @@ export default function ProductsPage() {
               borderRadius: '6px',
               letterSpacing: '1px'
             }}>
-              PRO
+              LIBRARY
             </span>
             <h1 style={{ fontSize: '22px', fontWeight: '800', color: '#0f172a', letterSpacing: '-0.3px' }}>
-              Vortex Stock Console
+              Lumina Shelf
             </h1>
           </div>
           <p style={{ color: '#64748b', fontSize: '13px', marginTop: '3px' }}>
-            Sistem Kelola Inventaris & Aset Terhubung MySQL Aiven SSL
+            Katalog Perpustakaan & Manajemen Koleksi Buku
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-          <div style={{
-            borderRight: '1px solid #e2e8f0',
-            paddingRight: '16px',
-            textAlign: 'right'
-          }}>
-            <div style={{ fontSize: '11px', fontWeight: '700', color: '#94a3b8', textTransform: 'uppercase' }}>
-              Database Status
-            </div>
-            <div style={{ fontSize: '13px', fontWeight: '700', color: '#0d9488', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'flex-end' }}>
-              <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#10b981' }}></span>
-              Aiven MySQL Active
-            </div>
-          </div>
-
-          <div style={{
-            backgroundColor: '#f1f5f9',
-            padding: '8px 16px',
-            borderRadius: '12px',
-            textAlign: 'center'
-          }}>
-            <div style={{ fontSize: '11px', fontWeight: '700', color: '#64748b' }}>TOTAL ITEM</div>
-            <div style={{ fontSize: '18px', fontWeight: '800', color: '#0f172a' }}>{products.length}</div>
-          </div>
+        <div style={{
+          backgroundColor: '#f1f5f9',
+          padding: '8px 18px',
+          borderRadius: '12px',
+          textAlign: 'center'
+        }}>
+          <div style={{ fontSize: '11px', fontWeight: '700', color: '#64748b' }}>TOTAL JUDUL</div>
+          <div style={{ fontSize: '18px', fontWeight: '800', color: '#0f172a' }}>{products.length} Buku</div>
         </div>
       </header>
 
@@ -234,7 +217,7 @@ export default function ProductsPage() {
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', paddingBottom: '12px', borderBottom: '1px solid #f1f5f9' }}>
             <h2 style={{ fontSize: '15px', fontWeight: '700', color: '#0f172a' }}>
-              {editingId ? '📝 Edit Item Produk' : '➕ Input Produk Baru'}
+              {editingId ? '📖 Edit Data Buku' : '📚 Tambah Buku Baru'}
             </h2>
             {editingId && (
               <button
@@ -249,11 +232,11 @@ export default function ProductsPage() {
           <form onSubmit={handleSubmit}>
             <div style={{ marginBottom: '16px' }}>
               <label style={{ display: 'block', fontSize: '12px', color: '#475569', marginBottom: '6px', fontWeight: '700' }}>
-                Nama Produk / Barang
+                Judul Buku
               </label>
               <input
                 type="text"
-                placeholder="Masukkan nama produk..."
+                placeholder="e.g. Laskar Pelangi"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 style={{
@@ -271,10 +254,10 @@ export default function ProductsPage() {
 
             <div style={{ marginBottom: '16px' }}>
               <label style={{ display: 'block', fontSize: '12px', color: '#475569', marginBottom: '6px', fontWeight: '700' }}>
-                Deskripsi Singkat
+                Penulis / Sinopsis Singkat
               </label>
               <textarea
-                placeholder="Detail spesifikasi..."
+                placeholder="Penulis & rangkuman cerita..."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={3}
@@ -294,11 +277,11 @@ export default function ProductsPage() {
 
             <div style={{ marginBottom: '22px' }}>
               <label style={{ display: 'block', fontSize: '12px', color: '#475569', marginBottom: '6px', fontWeight: '700' }}>
-                Harga Satuan (Rp)
+                Jumlah Stok
               </label>
               <input
                 type="number"
-                placeholder="Nominal angka saja..."
+                placeholder="e.g. 15"
                 value={price}
                 onKeyDown={handlePriceKeyDown}
                 onChange={(e) => setPrice(e.target.value)}
@@ -313,7 +296,7 @@ export default function ProductsPage() {
                   outline: 'none'
                 }}
               />
-              <p style={{ fontSize: '11px', color: '#94a3b8', marginTop: '5px' }}>Tanpa desimal / koma / titik.</p>
+              <p style={{ fontSize: '11px', color: '#94a3b8', marginTop: '5px' }}>Jumlah fisik buku yang tersedia.</p>
             </div>
 
             <button
@@ -331,7 +314,7 @@ export default function ProductsPage() {
                 boxShadow: '0 4px 12px rgba(15, 118, 110, 0.2)'
               }}
             >
-              {editingId ? 'Simpan Perubahan' : 'Tambahkan ke Database'}
+              {editingId ? 'Simpan Perubahan' : 'Simpan ke Katalog'}
             </button>
           </form>
         </aside>
@@ -358,10 +341,10 @@ export default function ProductsPage() {
               borderRadius: '10px',
               padding: '0 12px'
             }}>
-              <span style={{ color: '#94a3b8', fontSize: '14px' }}>🔎</span>
+              <span style={{ color: '#94a3b8', fontSize: '14px' }}>🔍</span>
               <input
                 type="text"
-                placeholder="Pencarian cepat barang..."
+                placeholder="Cari judul buku atau penulis..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{
@@ -385,87 +368,108 @@ export default function ProductsPage() {
               whiteSpace: 'nowrap',
               fontWeight: '600'
             }}>
-              Nilai Total: <strong style={{ color: '#0f766e' }}>Rp {totalPriceValue.toLocaleString('id-ID')}</strong>
+              Total Stok: <strong style={{ color: '#0f766e' }}>{totalStockCount.toLocaleString('id-ID')}</strong>
             </div>
           </div>
 
-          {loading ? (
-            <div style={{ padding: '60px 0', textAlign: 'center', color: '#94a3b8', fontSize: '13px' }}>
-              Memuat data inventaris...
+          <div style={{
+            backgroundColor: '#ffffff',
+            border: '1px solid #e2e8f0',
+            borderRadius: '16px',
+            padding: '20px',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.02)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', paddingBottom: '12px', borderBottom: '1px solid #f1f5f9' }}>
+              <h3 style={{ fontSize: '14px', fontWeight: '700', color: '#0f172a' }}>
+                📖 Daftar Koleksi Buku ({filteredProducts.length})
+              </h3>
             </div>
-          ) : filteredProducts.length === 0 ? (
-            <div style={{ padding: '60px 0', textAlign: 'center', color: '#94a3b8', fontSize: '13px', backgroundColor: '#ffffff', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
-              Tidak ada produk yang cocok dengan pencarian.
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {filteredProducts.map((item) => (
-                <div key={item.id} style={{
-                  backgroundColor: '#ffffff',
-                  border: '1px solid #e2e8f0',
-                  borderLeft: '4px solid #0f766e',
-                  borderRadius: '12px',
-                  padding: '16px 20px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  boxShadow: '0 2px 6px rgba(0,0,0,0.01)'
-                }}>
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <span style={{ fontSize: '15px', fontWeight: '700', color: '#0f172a' }}>
-                        {item.name}
-                      </span>
-                      <span style={{ fontSize: '11px', backgroundColor: '#f1f5f9', color: '#475569', padding: '2px 8px', borderRadius: '4px', fontWeight: '600' }}>
-                        ID #{item.id}
-                      </span>
-                    </div>
-                    
-                    <p style={{ fontSize: '13px', color: '#64748b', marginTop: '4px', maxWidth: '380px', lineHeight: '1.4' }}>
-                      {item.description}
-                    </p>
 
-                    <div style={{ marginTop: '8px', fontSize: '14px', fontWeight: '800', color: '#0f766e' }}>
-                      Rp {Number(item.price).toLocaleString('id-ID')}
+            {loading ? (
+              <div style={{ padding: '40px 0', textAlign: 'center', color: '#94a3b8', fontSize: '13px' }}>
+                Memuat daftar katalog buku...
+              </div>
+            ) : filteredProducts.length === 0 ? (
+              <div style={{ padding: '40px 0', textAlign: 'center', color: '#94a3b8', fontSize: '13px', backgroundColor: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                Belum ada koleksi buku yang sesuai.
+              </div>
+            ) : (
+              <div style={{
+                maxHeight: '420px',
+                overflowY: 'auto',
+                paddingRight: '6px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '12px'
+              }}>
+                {filteredProducts.map((item) => (
+                  <div key={item.id} style={{
+                    backgroundColor: '#ffffff',
+                    border: '1px solid #e2e8f0',
+                    borderLeft: '4px solid #0f766e',
+                    borderRadius: '12px',
+                    padding: '16px 20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    boxShadow: '0 2px 6px rgba(0,0,0,0.01)'
+                  }}>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{ fontSize: '15px', fontWeight: '700', color: '#0f172a' }}>
+                          📘 {item.name}
+                        </span>
+                        <span style={{ fontSize: '11px', backgroundColor: '#f1f5f9', color: '#475569', padding: '2px 8px', borderRadius: '4px', fontWeight: '600' }}>
+                          BOOK-{item.id}
+                        </span>
+                      </div>
+                      
+                      <p style={{ fontSize: '13px', color: '#64748b', marginTop: '4px', maxWidth: '400px', lineHeight: '1.4' }}>
+                        {item.description}
+                      </p>
+
+                      <div style={{ marginTop: '8px', fontSize: '13px', fontWeight: '700', color: '#0f766e', backgroundColor: '#f0fdf4', padding: '3px 10px', borderRadius: '6px', display: 'inline-block', border: '1px solid #bbf7d0' }}>
+                        Stok: {Number(item.price || 0)}
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button
+                        onClick={() => handleEditSelect(item)}
+                        style={{
+                          padding: '6px 14px',
+                          borderRadius: '6px',
+                          backgroundColor: '#f0f9ff',
+                          border: '1px solid #bae6fd',
+                          color: '#0284c7',
+                          fontSize: '12px',
+                          fontWeight: '700',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(item.id)}
+                        style={{
+                          padding: '6px 14px',
+                          borderRadius: '6px',
+                          backgroundColor: '#fef2f2',
+                          border: '1px solid #fecaca',
+                          color: '#dc2626',
+                          fontSize: '12px',
+                          fontWeight: '700',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Hapus
+                      </button>
                     </div>
                   </div>
-
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <button
-                      onClick={() => handleEditSelect(item)}
-                      style={{
-                        padding: '6px 14px',
-                        borderRadius: '6px',
-                        backgroundColor: '#f0f9ff',
-                        border: '1px solid #bae6fd',
-                        color: '#0284c7',
-                        fontSize: '12px',
-                        fontWeight: '700',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(item.id)}
-                      style={{
-                        padding: '6px 14px',
-                        borderRadius: '6px',
-                        backgroundColor: '#fef2f2',
-                        border: '1px solid #fecaca',
-                        color: '#dc2626',
-                        fontSize: '12px',
-                        fontWeight: '700',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      Hapus
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
+          </div>
 
         </section>
 
